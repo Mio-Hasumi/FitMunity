@@ -3,6 +3,8 @@ This is the FitMunity Developing Repository
 Product Roadmap for AI-Driven Weight Loss and Fitness Community App
 Below is a roadmap organized by phases, prioritizing features that establish the core value, drive engagement, and prepare for scalability. Each feature includes its rationale and prioritization.
 
+Access our current deploy and play around: https://graceful-beijinho-a3176d.netlify.app/
+
 We are currently searching for business AI solution for our first-step application/It seems proper prompt engineering can directly meet our basic need without Fine-tuning.
 We currently have Nomi as our top business choice (it even has a group chat function)
 
@@ -21,19 +23,19 @@ ________________________________________
 Phase 1: Core Foundations (1.26)
 Focus: Build the essential user experience, onboarding, and community features to launch an MVP.
 1. Onboarding & Community Welcome
-•	Feature: Friendly, personalized onboarding with AI character introductions and a virtual village setup.
+•	Feature: Friendly, personalized onboarding with AI character introductions and a virtual village setup. (Avatar needed)
 •	Rationale: Establishes the core emotional connection and sense of belonging for new users.
 •	Priority: ⭐⭐⭐⭐⭐
 2. Goal Setting
-•	Feature: Guided goal-setting flow with expert advice and customizable declaration post.
+•	Feature: Guided goal-setting flow with expert advice and customizable declaration post. (Should be called when first logging in)
 •	Rationale: Helps users start their journey with clarity and a sense of ownership.
 •	Priority: ⭐⭐⭐⭐⭐
 3. Progress Tracking Basics
-•	Feature: Enable users to track meals, weight, and emotions in a simple, intuitive interface.
+•	Feature: Enable users to track meals, weight, and emotions in a simple, intuitive interface. (Calories is done)
 •	Rationale: Tracking is central to the app's functionality and user engagement.
 •	Priority: ⭐⭐⭐⭐⭐
 4. AI Feedback & Support
-•	Feature: AI buddies and experts provide basic encouragement and suggestions based on user activity.
+•	Feature: AI buddies and experts provide basic encouragement and suggestions based on user activity. (Basically done)
 •	Rationale: Creates emotional support and reinforces the community experience.
 •	Priority: ⭐⭐⭐⭐⭐
 ________________________________________
