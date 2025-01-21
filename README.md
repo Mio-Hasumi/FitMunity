@@ -20,6 +20,7 @@ https://huggingface.co/datasets/Roger21/NutritionFineTune_1
 
 But it does turn out we still have a bunch of software stuff to do
 Phase 1 will be out top priority
+Note that our SQL is currently rather chaotic, but it works fine and will be cleaned out with clear policies
 
 ________________________________________
 Phase 1: Core Foundations (1.26)
