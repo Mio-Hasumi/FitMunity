@@ -3,10 +3,12 @@ This is the FitMunity Developing Repository
 Product Roadmap for AI-Driven Weight Loss and Fitness Community App
 Below is a roadmap organized by phases, prioritizing features that establish the core value, drive engagement, and prepare for scalability. Each feature includes its rationale and prioritization.
 
+For data safety, .env is not included
+
 Access our current deploy and play around: https://graceful-beijinho-a3176d.netlify.app/
 
-We are currently searching for business AI solution for our first-step application/It seems proper prompt engineering can directly meet our basic need without Fine-tuning.
-We currently have Nomi as our top business choice (it even has a group chat function)
+We are currently searching for AI solution for our first-step application/It seems proper prompt engineering can directly meet our basic need without Fine-tuning.
+e.g. Nomi
 
 It also turns out we have direct access to some therapist training sets (https://huggingface.co/datasets/Gragroo/therapist-sft-formatted-full_train)
 https://huggingface.co/datasets/RaviSheel04/Psychology-Data2
