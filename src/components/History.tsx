@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { MessageCircle, Tag as TagIcon, Send, Trash2 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { generateComment } from '../services/openai';
-import type { Post, Tag, Comment } from '../types';
+import type { Post, Tag } from '../types';
 import ImageGallery from './ImageGallery';
 import { supabase } from '../lib/supabase';
 
@@ -23,6 +23,7 @@ export default function History({
   const [replyContents, setReplyContents] = useState<Record<string, string>>({});
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
   const [commentToDelete, setCommentToDelete] = useState<{ postId: string; clusterId: string; commentId: string } | null>(null);
+  const { setPosts } = useAppContext();
   const tags: Tag[] = ['Mood', 'Food', 'Fitness', 'Achievements'];
 
   const filteredPosts = selectedTag
@@ -38,35 +39,95 @@ export default function History({
 
   const handleDeleteComment = async (postId: string, clusterId: string, commentId: string) => {
     try {
-      // Delete from Supabase
-      const { error } = await supabase
-        .from('comments')
-        .delete()
-        .eq('id', commentId);
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
 
-      if (error) throw error;
+      const cluster = post.commentClusters.find(c => c.id === clusterId);
+      if (!cluster) return;
 
-      // Update local state
-      const updatedPosts = posts.map(post => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            commentClusters: post.commentClusters.map(cluster => {
-              if (cluster.id === clusterId) {
-                return {
-                  ...cluster,
-                  comments: cluster.comments.filter(comment => comment.id !== commentId)
-                };
-              }
-              return cluster;
-            })
-          };
+      // Find the comment to be deleted
+      const commentToDelete = cluster.comments.find(c => c.id === commentId);
+      if (!commentToDelete) return;
+
+      // If this is the first comment in the cluster (main persona comment)
+      const isMainComment = cluster.comments[0]?.id === commentId;
+
+      if (isMainComment) {
+        // Delete all comments in the cluster from Supabase
+        const { error: deleteError } = await supabase
+          .from('comments')
+          .delete()
+          .eq('cluster_id', clusterId);
+
+        if (deleteError) {
+          console.error('Error deleting comments:', deleteError);
+          throw deleteError;
         }
-        return post;
-      });
 
-      // Update context
-      setPosts(updatedPosts);
+        // Delete the cluster itself
+        const { error: clusterError } = await supabase
+          .from('comment_clusters')
+          .delete()
+          .eq('id', clusterId);
+
+        if (clusterError) {
+          console.error('Error deleting cluster:', clusterError);
+          throw clusterError;
+        }
+
+        // Update local state to remove the entire cluster
+        setPosts(prevPosts => 
+          prevPosts.map(p => {
+            if (p.id === postId) {
+              return {
+                ...p,
+                commentClusters: p.commentClusters.filter(c => c.id !== clusterId)
+              };
+            }
+            return p;
+          })
+        );
+
+        // Clear any reply content for this cluster
+        setReplyContents(prev => {
+          const updated = { ...prev };
+          delete updated[clusterId];
+          return updated;
+        });
+      } else {
+        // Delete just the single comment
+        const { error } = await supabase
+          .from('comments')
+          .delete()
+          .eq('id', commentId)
+          .eq('cluster_id', clusterId);
+
+        if (error) {
+          console.error('Error deleting comment:', error);
+          throw error;
+        }
+
+        // Update local state
+        setPosts(prevPosts => 
+          prevPosts.map(post => {
+            if (post.id === postId) {
+              return {
+                ...post,
+                commentClusters: post.commentClusters.map(cluster => {
+                  if (cluster.id === clusterId) {
+                    return {
+                      ...cluster,
+                      comments: cluster.comments.filter(comment => comment.id !== commentId)
+                    };
+                  }
+                  return cluster;
+                })
+              };
+            }
+            return post;
+          })
+        );
+      }
     } catch (error) {
       console.error('Error deleting comment:', error);
     } finally {
@@ -352,25 +413,27 @@ function PostCard({
               ))}
 
               {/* Reply Form */}
-              <form 
-                onSubmit={(e) => onReplySubmit(post.id, cluster.id, e)}
-                className="flex gap-2 mt-2 ml-8"
-              >
-                <input
-                  type="text"
-                  value={replyContent[cluster.id] || ''}
-                  onChange={(e) => onReplyChange(cluster.id, e.target.value)}
-                  placeholder="Write a reply..."
-                  className="flex-1 px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                />
-                <button
-                  type="submit"
-                  disabled={!replyContent[cluster.id]?.trim()}
-                  className="p-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              {cluster.comments.length > 0 && (
+                <form 
+                  onSubmit={(e) => onReplySubmit(post.id, cluster.id, e)}
+                  className="flex gap-2 mt-2 ml-8"
                 >
-                  <Send className="w-5 h-5" />
-                </button>
-              </form>
+                  <input
+                    type="text"
+                    value={replyContent[cluster.id] || ''}
+                    onChange={(e) => onReplyChange(cluster.id, e.target.value)}
+                    placeholder="Write a reply..."
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!replyContent[cluster.id]?.trim()}
+                    className="p-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                </form>
+              )}
             </div>
           ))}
         </div>
